@@ -22,14 +22,6 @@ Find the migration files at `/src/main/resources/db.migration`
 
 I followed an "API Spec" first and used the open api schema provided to auto generate the dtos and models. 
 
-### Good practices
-
-* SRP -> 
-  * Validations are done through their own services
-  * Filters are done through their own services
-* Architecture -> Controller - Service - Repository
-  * Each layer of the application is responsible for its own area of domain.
-
 ### Endpoints
 * /health
   * Controller used to know if the application is up
@@ -58,6 +50,10 @@ I was not able to make the application handle 10 parallel 500mb uploads.
 50mb is very aggressive, but could be archivable if
 * We introduce a queue (eventing pattern), if we limit the amount of concurrent uploads through queues we could archive this.
 * Direct upload to Minio using upload pre-sign url.
+
+### Postman
+
+Find a postman folder that you can export to call the endpoints in this applicaiton.
 
 ## Overview 🚀
 
