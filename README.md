@@ -1,5 +1,64 @@
 # 📄 Document Management API Challenge
 
+## Candidate <Ivan Andres Carrillo Bustos>
+
+### Start the application
+
+* Create a .env file at /docker/
+  * You can use the exampleEnv as example.
+* Run the script: `/docker/start.sh`
+
+#### The script will:
+* Load the env variables from the .env
+* Run docker compose to get minio, postgresql and build the application.
+
+### Application first startup
+
+The application will run migraitons using flywaydb and create all tables and indexes. 
+
+Find the migration files at `/src/main/resources/db.migration`
+
+### API Spec
+
+I followed an "API Spec" first and used the open api schema provided to auto generate the dtos and models. 
+
+### Good practices
+
+* SRP -> 
+  * Validations are done through their own services
+  * Filters are done through their own services
+* Architecture -> Controller - Service - Repository
+  * Each layer of the application is responsible for its own area of domain.
+
+### Endpoints
+* /health
+  * Controller used to know if the application is up
+* /actuator
+  * Endpoint used to monitor the app
+* /swagger-ui/index.html
+  * API Documentation
+* /document-management/upload
+  * Endpoint to upload files to minio.
+* /document-management/search
+  * Endpoint to get data from database.
+* /document-management/download/:document_id
+  * Endpoint to get an url to get files from minio.
+
+### Scripts
+
+* /scripts/upload_documents.sh
+  * This script uploads 10 files at the same time, I used it to test if the app could handle 10 files of 500mb.
+* /docker/start.sh
+  * This script gets the env variables from .env and start the services.
+
+### About 50mb constraint.
+
+I was not able to make the application handle 10 parallel 500mb uploads.
+
+50mb is very aggressive, but could be archivable if
+* We introduce a queue (eventing pattern), if we limit the amount of concurrent uploads through queues we could archive this.
+* Direct upload to Minio using upload pre-sign url.
+
 ## Overview 🚀
 
 In this challenge, you will build a backend API service to manage **large PDF documents**. The service must allow users to upload, search, and download PDF documents while efficiently handling resources, given a **memory limitation of 50MB assigned to the document management service container**.
@@ -168,3 +227,9 @@ Even if you are unable to complete the challenge 100%, please explain why you co
 
 ---
 
+
+# Build the jar
+mvn clean package -DskipTests
+
+# Run with memory limit
+java -Xmx150m -jar target/**.jar

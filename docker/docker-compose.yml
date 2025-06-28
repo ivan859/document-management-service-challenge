@@ -8,12 +8,11 @@ services:
       - batch_network
     volumes:
       - challenge_postgresql_data:/bitnami/postgresql
-      - ./init-scripts:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRESQL_USERNAME={CHANGE_ME}
-      - POSTGRESQL_PASSWORD={CHANGE_ME}
-      - POSTGRESQL_DATABASE=challenge
-      - POSTGRESQL_POSTGRES_PASSWORD={CHANGE_ME} # Password of user "postgres"
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD} # Password of user "postgres"
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -21,21 +20,48 @@ services:
     ports:
       - "9000:9000"  # API S3
       - "9001:9001"  # MinIO Web Console
+    networks:
+      - batch_network
     environment:
-      MINIO_ROOT_USER: {CHANGE_ME}
-      MINIO_ROOT_PASSWORD: {CHANGE_ME}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server --console-address ":9001" /data
     volumes:
       - challenge_minio_data:/data
-  # Include all the necessary settings to include a document management service in the stack
-  # Remember to configure this service to limit the memory to 50MB
-  # document-management-service:
-  #    environment:
-  #      - JAVA_OPTS=-Xmx50m -Xms50m
-  #    deploy:
-  #      resources:
-  #        limits:
-  #          memory: 50M
+  document-management-service:
+    ports:
+      - "8080:8080"  # API S3
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: document-management-service
+    depends_on:
+      - postgresql
+      - minio
+    networks:
+      - batch_network
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/${POSTGRESQL_DATABASE}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRESQL_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRESQL_PASSWORD}
+      - MINIO_URL=${MINIO_URL}
+      - MINIO_USER=${MINIO_ROOT_USER}
+      - MINIO_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=${MAX_FILE_SIZE}
+      - SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE}
+      - SPRING_SERVLET_MULTIPART_FILE_SIZE_THRESHOLD=${FILE_SIZE_THRESHOLD}
+      - SPRING_SERVLET_MULTIPART_LOCATION=${UPLOAD_LOCATION}
+      - SPRINGDOC_API_DOCS_ENABLED=${SPRINGDOC_API_DOCS_ENABLED}
+      - SPRINGDOC_SWAGGER_UI_ENABLED=${SPRINGDOC_SWAGGER_UI_ENABLED}
+      - SPRINGDOC_SWAGGER_UI_URL=${SPRINGDOC_SWAGGER_UI_URL}
+      - SPRINGDOC_SWAGGER_UI_PATH=${SPRINGDOC_SWAGGER_UI_PATH}
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE}
+      - JAVA_OPTS=-Xmx50m -Xms50m
+    deploy:
+      resources:
+        limits:
+          memory: 200M
 
 volumes:
   challenge_postgresql_data:

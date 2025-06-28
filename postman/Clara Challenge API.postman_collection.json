@@ -1,0 +1,242 @@
+{
+	"info": {
+		"_postman_id": "505f87db-d0e4-4698-bf79-6638ad6a7d73",
+		"name": "Clara Challenge API",
+		"description": "Document Management Service API collection for Clara Challenge. This collection includes all endpoints for document upload, search, download, and health check.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Get Health Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Simple health check endpoint to verify the service is running"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoints"
+		},
+		{
+			"name": "Document Management",
+			"item": [
+				{
+					"name": "Upload Document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "user",
+									"value": "{{sampleUser}}",
+									"description": "The user who is uploading the document",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "{{sampleDocumentName}}",
+									"description": "The document name",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "{{sampleTag1}}",
+									"description": "Document tags (can add multiple)",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "{{sampleTag2}}",
+									"description": "Additional tag",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"description": "The PDF file to upload (select a PDF file)",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/documents/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"documents",
+								"upload"
+							]
+						},
+						"description": "Upload a PDF document with metadata. The file must be a PDF format."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Documents",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user\": \"{{sampleUser}}\",\n  \"name\": \"{{sampleDocumentName}}\",\n  \"tags\": [\"{{sampleTag1}}\", \"{{sampleTag2}}\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/document-management/search?page={{defaultPage}}&size={{defaultSize}}&sort={{defaultSort}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"document-management",
+								"search"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{defaultPage}}",
+									"description": "Zero-based page index (0..N)"
+								},
+								{
+									"key": "size",
+									"value": "{{defaultSize}}",
+									"description": "The size of the page to be returned"
+								},
+								{
+									"key": "sort",
+									"value": "{{defaultSort}}",
+									"description": "Sorting criteria in the format: property,(asc|desc)"
+								}
+							]
+						},
+						"description": "Search for documents using filters. All filters are optional."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Documents - Empty Filters",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/document-management/search?page={{defaultPage}}&size={{defaultSize}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"document-management",
+								"search"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{defaultPage}}"
+								},
+								{
+									"key": "size",
+									"value": "{{defaultSize}}"
+								}
+							]
+						},
+						"description": "Search for all documents without any filters - returns all documents with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Download Document",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/document-management/download/{{sampleDocumentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"document-management",
+								"download",
+								"{{sampleDocumentId}}"
+							]
+						},
+						"description": "Get a presigned download URL for a document by its ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Document management operations including upload, search, and download"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

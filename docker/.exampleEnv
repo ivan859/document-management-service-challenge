@@ -1,0 +1,37 @@
+# Server Configuration
+SERVER_PORT=8080
+
+# PostgresQL
+POSTGRESQL_USERNAME=ivan
+POSTGRESQL_PASSWORD=abcd
+POSTGRESQL_DATABASE=document_management_test
+POSTGRESQL_POSTGRES_PASSWORD=abcd1234
+
+# Database Configuration (for Spring app)
+DB_URL=jdbc:postgresql://localhost:5432/document_management_test
+DB_USERNAME=ivan
+DB_PASSWORD=abcd
+
+# File Upload Configuration
+MAX_FILE_SIZE=500MB
+MAX_REQUEST_SIZE=5GB
+FILE_SIZE_THRESHOLD=0MB
+UPLOAD_LOCATION=/tmp/uploads
+
+# Minio
+MINIO_ROOT_USER=ivan
+MINIO_ROOT_PASSWORD=abcd1234
+MINIO_URL=http://minio:9000
+
+# MinIO Configuration (for Spring app)
+MINIO_USER=ivan
+MINIO_PASSWORD=abcd1234
+
+# SpringDoc Configuration
+SPRINGDOC_API_DOCS_ENABLED=true
+SPRINGDOC_SWAGGER_UI_ENABLED=true
+SPRINGDOC_SWAGGER_UI_URL=/document-management-open-api.yml
+SPRINGDOC_SWAGGER_UI_PATH=/swagger-ui.html
+
+# Management Endpoints
+MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=metrics,heapdump

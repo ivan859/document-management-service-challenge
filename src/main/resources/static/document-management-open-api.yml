@@ -89,15 +89,14 @@ paths:
             order is ascending. Multiple sort criteria are supported.
           required: false
           schema:
-            type: array
-            items:
-              type: string
+            type: string
+            enum: [asc, desc]
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/DocumentSearchFilters'
-        required: true
+        required: false
       responses:
         '200':
           description: The documents were found successfully.
@@ -156,7 +155,7 @@ paths:
         '200':
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/DocumentDownloadUrl'
         '400':

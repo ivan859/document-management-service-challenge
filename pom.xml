@@ -13,7 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>document-management-service-challenge</name>
 	<description>This project implements a file management system, integrates with simulated services (LocalStack for AWS S3), features centralized exception handling, and includes both unit and integration tests. Developed as a challenge to assess advanced skills in Java 8+, Spring Boot, testing, Docker containers and docker-compose, while adhering to design patterns and best coding practices.</description>
-
+	
 	<properties>
 		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,6 +26,12 @@
 		<googleJavaFormat.version>1.22.0</googleJavaFormat.version>
 
 		<minio.version>8.4.3</minio.version>
+		<springdoc.version>2.5.0</springdoc.version>
+		<openapi-generator.version>7.12.0</openapi-generator.version>
+		
+		<open-api-target>${project.basedir}/src/target/generated-sources/openapi</open-api-target>
+		<open-api-input-spec>${project.basedir}/src/main/resources/static/document-management-open-api.yml</open-api-input-spec>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -35,6 +41,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -47,26 +57,95 @@
 			<version>${minio.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
-		</dependency>
+		</dependency> 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${springdoc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>2.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>9.22.3</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<finalName>${project.artifact.name}-${project.version}-${build.number}</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${openapi-generator.version}</version> 
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<inputSpec>${open-api-input-spec}</inputSpec>
+					<output>${open-api-target}</output>
+					<generatorName>spring</generatorName>
+					<configOptions>
+						<interfaceOnly>true</interfaceOnly>
+						<useTags>true</useTags>
+						<dateLibrary>java8</dateLibrary>
+					</configOptions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-generated-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${open-api-target}/src/main/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -84,11 +163,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.8</version>
-			</plugin>
-			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
@@ -98,6 +172,14 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<mainClass>com.clara.ops.challenge.document_management_service_challenge.DocumentManagementServiceChallengeApplication</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -125,6 +207,7 @@
 				<version>${spotless.maven.plugin.version}</version>
 				<configuration>
 					<java>
+						<indentWithTabs>true</indentWithTabs>
 						<includes>
 							<include>src/main/java/**/*.java</include>
 							<include>src/test/java/**/*.java</include>
